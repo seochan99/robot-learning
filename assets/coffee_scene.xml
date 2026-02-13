@@ -1,0 +1,164 @@
+<mujoco model="coffee_robot_scene">
+  <option gravity="0 0 -9.81" timestep="0.002"/>
+
+  <visual>
+    <global offwidth="1280" offheight="720"/>
+    <quality shadowsize="4096"/>
+    <map znear="0.01" zfar="50"/>
+  </visual>
+
+  <asset>
+    <!-- Materials -->
+    <texture name="sky" type="skybox" builtin="gradient" rgb1="0.05 0.05 0.15" rgb2="0.2 0.3 0.5"
+             width="512" height="512"/>
+    <texture name="floor_tex" type="2d" builtin="checker" rgb1="0.15 0.15 0.18" rgb2="0.2 0.2 0.24"
+             width="256" height="256" mark="none"/>
+    <texture name="wood_tex" type="2d" builtin="flat" rgb1="0.45 0.3 0.2" rgb2="0.5 0.35 0.25"
+             width="256" height="256" mark="random" markrgb="0.4 0.28 0.18"/>
+    <texture name="metal_tex" type="2d" builtin="flat" rgb1="0.7 0.72 0.75" rgb2="0.6 0.62 0.65"
+             width="256" height="256"/>
+
+    <material name="floor_mat" texture="floor_tex" texrepeat="8 8" reflectance="0.3"/>
+    <material name="wood_mat" texture="wood_tex" texrepeat="3 3" reflectance="0.1"/>
+    <material name="metal_mat" texture="metal_tex" reflectance="0.5" specular="0.8" shininess="0.9"/>
+    <material name="dark_metal" rgba="0.2 0.2 0.22 1" specular="0.9" shininess="0.95" reflectance="0.4"/>
+    <material name="white_ceramic" rgba="0.95 0.95 0.92 1" specular="0.5" shininess="0.7" reflectance="0.2"/>
+    <material name="coffee_liquid" rgba="0.25 0.15 0.08 0.9" specular="0.8" shininess="0.9"/>
+    <material name="red_button" rgba="0.85 0.15 0.1 1" specular="0.6" shininess="0.8"/>
+    <material name="green_light" rgba="0.1 0.85 0.2 1" emission="0.5"/>
+    <material name="robot_base" rgba="0.15 0.15 0.17 1" specular="0.7" shininess="0.8" reflectance="0.3"/>
+    <material name="robot_link" rgba="0.85 0.85 0.88 1" specular="0.8" shininess="0.9" reflectance="0.4"/>
+    <material name="robot_joint" rgba="0.3 0.55 0.85 1" specular="0.6" shininess="0.7"/>
+    <material name="gripper_mat" rgba="0.2 0.2 0.22 1" specular="0.7" shininess="0.8"/>
+    <material name="target_mat" rgba="0.9 0.3 0.2 0.5" specular="0.3"/>
+  </asset>
+
+  <worldbody>
+    <!-- Lighting -->
+    <light pos="0 0 3" dir="0 0 -1" diffuse="0.8 0.8 0.85" specular="0.3 0.3 0.3" castshadow="true"/>
+    <light pos="1.5 -1 2" dir="-0.5 0.3 -0.8" diffuse="0.4 0.35 0.3" specular="0.2 0.2 0.2" castshadow="true"/>
+    <light pos="-1 1 2.5" dir="0.3 -0.3 -0.8" diffuse="0.2 0.2 0.35" specular="0.1 0.1 0.15"/>
+
+    <!-- Floor -->
+    <geom type="plane" size="3 3 0.01" material="floor_mat"/>
+
+    <!-- Table -->
+    <body name="table" pos="0.5 0 0.4">
+      <geom type="box" size="0.5 0.4 0.02" material="wood_mat" mass="50"/>
+      <!-- Table legs -->
+      <geom type="cylinder" pos="-0.45 -0.35 -0.2" size="0.025 0.2" material="dark_metal"/>
+      <geom type="cylinder" pos="0.45 -0.35 -0.2" size="0.025 0.2" material="dark_metal"/>
+      <geom type="cylinder" pos="-0.45 0.35 -0.2" size="0.025 0.2" material="dark_metal"/>
+      <geom type="cylinder" pos="0.45 0.35 -0.2" size="0.025 0.2" material="dark_metal"/>
+    </body>
+
+    <!-- Coffee Machine -->
+    <body name="coffee_machine" pos="0.85 0 0.42">
+      <!-- Main body -->
+      <geom type="box" size="0.12 0.1 0.18" pos="0 0 0.18" material="dark_metal"/>
+      <!-- Top -->
+      <geom type="box" size="0.13 0.11 0.01" pos="0 0 0.37" material="dark_metal"/>
+      <!-- Drip area -->
+      <geom type="box" size="0.08 0.08 0.005" pos="0 0 0.005" material="metal_mat"/>
+      <!-- Spout -->
+      <geom type="cylinder" size="0.015 0.03" pos="0 0 0.12" material="metal_mat"/>
+      <!-- Button -->
+      <geom type="sphere" size="0.015" pos="-0.12 0 0.28" material="red_button"/>
+      <!-- Power light -->
+      <geom type="sphere" size="0.008" pos="-0.12 0 0.22" material="green_light"/>
+    </body>
+
+    <!-- Coffee Cup -->
+    <body name="cup" pos="0.5 0 0.43">
+      <joint name="cup_free" type="free"/>
+      <geom name="cup_body" type="cylinder" size="0.035 0.045" material="white_ceramic" mass="0.15"/>
+      <!-- Cup handle -->
+      <geom type="capsule" fromto="0.035 0 0.02 0.055 0 0.02" size="0.008" material="white_ceramic"/>
+      <geom type="capsule" fromto="0.035 0 -0.02 0.055 0 -0.02" size="0.008" material="white_ceramic"/>
+      <geom type="capsule" fromto="0.055 0 -0.02 0.055 0 0.02" size="0.008" material="white_ceramic"/>
+      <!-- Coffee inside -->
+      <geom type="cylinder" size="0.03 0.005" pos="0 0 0.035" material="coffee_liquid"/>
+    </body>
+
+    <!-- Second cup (empty, target) -->
+    <body name="cup2" pos="0.35 0.15 0.43">
+      <joint name="cup2_free" type="free"/>
+      <geom name="cup2_body" type="cylinder" size="0.035 0.045" rgba="0.8 0.85 0.9 1"
+            mass="0.1" specular="0.5" shininess="0.7"/>
+      <geom type="capsule" fromto="0.035 0 0.02 0.055 0 0.02" size="0.008" rgba="0.8 0.85 0.9 1"/>
+      <geom type="capsule" fromto="0.035 0 -0.02 0.055 0 -0.02" size="0.008" rgba="0.8 0.85 0.9 1"/>
+      <geom type="capsule" fromto="0.055 0 -0.02 0.055 0 0.02" size="0.008" rgba="0.8 0.85 0.9 1"/>
+    </body>
+
+    <!-- Saucer / Plate -->
+    <body name="saucer" pos="0.35 -0.15 0.42">
+      <geom type="cylinder" size="0.06 0.005" material="white_ceramic"/>
+    </body>
+
+    <!-- Robot Arm (6DOF) -->
+    <body name="robot_base_link" pos="0.15 0 0.42">
+      <geom type="cylinder" size="0.06 0.015" material="robot_base"/>
+
+      <body name="link1" pos="0 0 0.015">
+        <joint name="joint1" type="hinge" axis="0 0 1" range="-170 170" damping="5"/>
+        <geom type="cylinder" size="0.04 0.05" material="robot_joint"/>
+
+        <body name="link2" pos="0 0 0.1">
+          <joint name="joint2" type="hinge" axis="0 1 0" range="-120 120" damping="5"/>
+          <geom type="capsule" fromto="0 0 0 0 0 0.2" size="0.03" material="robot_link"/>
+
+          <body name="link3" pos="0 0 0.2">
+            <joint name="joint3" type="hinge" axis="0 1 0" range="-120 120" damping="3"/>
+            <geom type="capsule" fromto="0 0 0 0 0 0.18" size="0.025" material="robot_link"/>
+
+            <body name="link4" pos="0 0 0.18">
+              <joint name="joint4" type="hinge" axis="0 0 1" range="-170 170" damping="2"/>
+              <geom type="cylinder" size="0.025 0.02" material="robot_joint"/>
+
+              <body name="link5" pos="0 0 0.02">
+                <joint name="joint5" type="hinge" axis="0 1 0" range="-120 120" damping="2"/>
+                <geom type="capsule" fromto="0 0 0 0 0 0.1" size="0.02" material="robot_link"/>
+
+                <body name="wrist" pos="0 0 0.1">
+                  <joint name="joint6" type="hinge" axis="0 0 1" range="-170 170" damping="1"/>
+                  <geom type="cylinder" size="0.022 0.01" material="robot_joint"/>
+
+                  <!-- Gripper -->
+                  <body name="gripper_base" pos="0 0 0.01">
+                    <geom type="box" size="0.02 0.03 0.01" material="gripper_mat"/>
+
+                    <body name="finger_left" pos="0 -0.03 0.01">
+                      <joint name="gripper_left" type="slide" axis="0 1 0" range="0 0.025" damping="10"/>
+                      <geom type="box" size="0.015 0.005 0.025" material="gripper_mat"/>
+                    </body>
+
+                    <body name="finger_right" pos="0 0.03 0.01">
+                      <joint name="gripper_right" type="slide" axis="0 -1 0" range="0 0.025" damping="10"/>
+                      <geom type="box" size="0.015 0.005 0.025" material="gripper_mat"/>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+
+    <!-- Target indicator (transparent) -->
+    <body name="target" pos="0.85 0 0.48">
+      <geom type="cylinder" size="0.04 0.002" material="target_mat"/>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <motor joint="joint1" ctrlrange="-1 1" gear="80"/>
+    <motor joint="joint2" ctrlrange="-1 1" gear="80"/>
+    <motor joint="joint3" ctrlrange="-1 1" gear="60"/>
+    <motor joint="joint4" ctrlrange="-1 1" gear="40"/>
+    <motor joint="joint5" ctrlrange="-1 1" gear="40"/>
+    <motor joint="joint6" ctrlrange="-1 1" gear="20"/>
+    <motor joint="gripper_left" ctrlrange="0 1" gear="30"/>
+    <motor joint="gripper_right" ctrlrange="0 1" gear="30"/>
+  </actuator>
+</mujoco>
