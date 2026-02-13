@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Virtual environment
+.venv/
+
+# Model weights (too large for git)
+*.pt
+*.pth
+*.ckpt
+
+# Data
+*.mp4
+*.parquet
+data/
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# HuggingFace cache
+.cache/
